@@ -42,6 +42,18 @@ a link or button is never an authorization mechanism.
 Operational users land on Job On. An Admin-only user lands on Admin. There is no profile selector at
 login. A missing active identity, missing grant, invalid command, or stale version fails closed.
 
+The Beta profile/module behavior is:
+
+| Module | Admin | Operador / Controlador | Responsável |
+|---|---|---|---|
+| Job On | No implicit operational access | Consult and confirm checks | Create, edit, duplicate, select tooling |
+| Controlo | No implicit operational access | Measure, record, submit | Review, approve, reject, reopen |
+| Ferramentas | No implicit operational access | Consult where granted | Maintain master data and rules |
+| Boquilhas | No implicit operational access | Operational actions | Same operational actions |
+| Admin | Users/access administration | No | No |
+
+Boquilhas is deliberately the same operational workflow for Operador / Controlador and Responsável.
+
 ## 3. Canonical Identity and Ownership
 
 - `tool_id` is the stable, invisible identity of a canonical Tool master record.
@@ -53,6 +65,17 @@ login. A missing active identity, missing grant, invalid command, or stale versi
   visible fields again to guess a relation.
 - CM/MF preserve both Tool/context identity and the individual piece number where the workflow needs
   a piece number. BQ repair movements are quantity-based.
+- Every new Job On, including duplication, creates NEW `cm_id`, `mf_id`, and `bq_id` context
+  snapshots from the CURRENT canonical Tool rows. The canonical `tool_id` may be reused; prior
+  context IDs are never reused and previous contexts remain frozen.
+- `peso_id` belongs to Controlo. In production it continues the existing `cm_id` relation; a
+  pending pre-JobOn Peso may temporarily anchor to the canonical `tool_id` until a human-confirmed
+  association to the real `cm_id` is possible.
+- Each Comparação occurrence gets a new `comparacao_id` and reuses the existing `cm_id`.
+- A Boquilhas register keeps the same `boquilhas_id` when its provisional `tool_id` anchor is
+  later replaced by the matching real `bq_id`.
+- There is no `production_id`, `previous_peso_id`, or parallel identity used to recreate an
+  already-existing relation.
 
 ## 4. Job On
 
@@ -88,6 +111,10 @@ silently rewrite a historical production snapshot.
 - Check confirmation is manual and records authenticated user and timestamp. It is never inferred
   from stock, repair, technical condition, usage, or elapsed time.
 - Duplicating a Job On does not copy old check history; the new occurrence gets its own checks.
+- Duplication creates a NEW `jobon_id`. The source contributes canonical `tool_id` selections,
+  but the duplicate creates NEW CM/MF/BQ context IDs from the CURRENT Tool master state rather than
+  reusing or copying the source context IDs.
+- The source Job On and its frozen contexts remain unchanged.
 
 ### 4.4 Downstream context
 
@@ -126,6 +153,11 @@ reopens, and decides. Technical OK/NOK is not an automatic production decision.
 
 Peso operates within the Job On production context and records individual results per CM.
 
+A `peso_id` persists through draft/edit/submit/approve/reject/reopen. It is not copied for approval.
+A Peso is anchored to exactly one context at a time: the real production `cm_id`, or provisionally
+the canonical `tool_id` while waiting for the matching Job On/CM context. Association to the real
+`cm_id` is explicit; the pending Tool anchor is then cleared.
+
 Inputs may include water weight, mold state, water temperature, nominal weight, established SAP or
 previous-final reference values, notes, and technical reference values.
 
@@ -138,17 +170,29 @@ Cap volume = pi * sagitta^2 * (3 * radius - sagitta) / 3
 ```
 
 Capacity/Volume and glass weight remain visible first-class values per CM. Temperature support is
-5–35 °C. The cap volume is informational and does not change the principal glass-weight result.
+5–35 °C. Water density is resolved automatically from the built-in temperature table; the operator
+does not enter density or a divisor. Glass density comes from Controlo settings for the applicable
+process and is frozen on the Peso at the first successful calculate/save. Later setting changes
+affect new Pesos, not an existing Peso. The cap volume is informational and does not change the
+principal glass-weight result.
 
 Initial control happens before production. It records individual values, may show an informative
 global average, and goes to the Responsável for a general decision. An average never hides an
 individual result.
 
+The Peso lifecycle uses `pendente`, `aprovado`, and `nao_aprovado`. Submit records who/when
+without creating a new Peso; approve/reject are Responsável decisions; rejection requires a reason;
+reopen returns the same Peso to `pendente`. Decision history is append-only. Once decided, the
+original measurement rows, computed results, average, water temperature, frozen glass density,
+volumes, submission facts, and decision remain historical facts and are never rewritten by
+Comparação.
+
 ### 6.2 Comparison
 
 Comparison is optional and happens during production as a new Peso workflow occurrence.
 
-- Each occurrence has its own comparison record identity.
+- Each occurrence has its own comparison record identity; one Peso may have multiple Comparação
+  occurrences over time.
 - It reuses the existing `cm_id` frozen in the same production context.
 - It may cover one or several CMs.
 - It uses the same Peso calculations.
@@ -156,6 +200,10 @@ Comparison is optional and happens during production as a new Peso workflow occu
 - Colocar de parte requires a justification.
 - It never changes original Peso measurements, average, approval, PDF, or frozen facts.
 - It never mutates Tool, Job On, or physical-stock state automatically.
+- Comparison measurement rows are separate from the original Peso measurement rows and never enter
+  the original Peso average.
+- Every measured CM receives its own explicit final decision. A Comparação is only functionally
+  complete when all measured subjects have a decision.
 - There is no relation to a previous production Peso and no inferred pairing by CM number or row
   position.
 
@@ -213,8 +261,15 @@ Only these movements are valid:
 3. **Entrada sem reparação** — BQ returned without repair.
 
 There is no extra movement type, permanent standalone BQ lifecycle, irreparable Tool state, or
-automatic quantity mutation. The register is quantity-based. Balance is derived from the movement
-ledger. Excess returns are recorded completely and shown as a non-blocking discrepancy.
+automatic quantity mutation. The register is quantity-based. Outstanding quantity is derived at
+read time as:
+
+```text
+Saída - Entrada - Entrada sem reparação
+```
+
+It is never stored as a separate balance. A negative result is valid and visible; excess returns are
+recorded completely and shown as a non-blocking discrepancy.
 
 ### 7.3 Settings and history
 
@@ -246,11 +301,18 @@ Structured records and snapshots are the source of truth. PDFs are derived outpu
 printing, and distribution. PDF generation must be repeatable and must not alter the structured
 record.
 
-Peso files use this deterministic target:
+The shared production document directory is:
 
 ```text
-<base>/<reference>/<production-number>/Peso_<reference>_<machine>.pdf
+<base>/<reference>/<production-number>/
+    Peso_<reference>_<machine>.pdf
+    Resume_<reference>_<machine>.pdf
+    Pegamentos_<reference>_<machine>.pdf
 ```
+
+Only the base directory is configured manually. Reference and production subdirectories are
+created/reused automatically. Job On and Controlo refer to the same production document
+relationship; Job On does not own a duplicate document tree.
 
 Directories are created by the server-side storage adapter. A file already at the target is not
 silently overwritten. Sending is explicit and manual: the existing PDF is read, never regenerated
@@ -260,6 +322,8 @@ then to the configured template and recipient list. Unsupported or incomplete ro
 ## 10. Non-Negotiable Boundaries
 
 - Do not create parallel production or Tool identities.
+- Do not create a new relation when an existing true relation can be continued; UUIDs connect
+  context and persisted structures store genuinely new facts.
 - Do not infer relations from visible labels, dates, latest records, or row positions.
 - Do not turn internal Controlo areas into modules.
 - Do not use dormant legacy Comparison code as a functional contract.
