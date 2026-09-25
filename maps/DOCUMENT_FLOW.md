@@ -23,12 +23,27 @@ Structured production/control record
 - Email transport is distribution only; it never changes a measurement, decision, or production
   context.
 
-## Peso PDF
+## Production Document Directory
 
-The deterministic target is:
+The shared deterministic production directory is:
 
 ```text
-<base>/<reference>/<production-number>/Peso_<reference>_<machine>.pdf
+<base>/<reference>/<production-number>/
+    Peso_<reference>_<machine>.pdf
+    Resume_<reference>_<machine>.pdf
+    Pegamentos_<reference>_<machine>.pdf
+```
+
+Only the base directory is configured manually. Reference and production folders are created or
+reused automatically. Job On consumes the same production/revision document relationship; it does
+not own a second document tree.
+
+## Peso PDF
+
+The Peso document target within that directory is:
+
+```text
+Peso_<reference>_<machine>.pdf
 ```
 
 Rules:
