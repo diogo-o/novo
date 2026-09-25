@@ -1,33 +1,41 @@
-# BA DMO — Clean Functional Reference
+# BA DMO — Beta Context
 
-This repository is the **clean functional reference** for **Sol**.
-
-It contains the current functional truth of the product and nothing else:
-
-- `MANUAL.md` — the functional manual (modules, operator flow, calculations, field meaning, UI behaviour, document behaviour).
-- `CURRENT_STATE.md` — a very short implementation-status summary (`IMPLEMENTED` / `PARTIAL` / `NOT IMPLEMENTED` / `CURRENT WORK`).
-
-## What this repository is
-
-- A single, current, functional source of truth.
-- The functional manual is the **main functional source**.
-- Owner-confirmed workflow decisions that are **newer than the manual** override the manual only where they explicitly apply.
-
-## What this repository is not
-
-- It is **not** an architecture document.
-- It is **not** an implementation contract.
-- It is **not** a plan, report, workstream history or reconciliation record.
+This repository is the clean, Beta-only context pack for Sol. It contains functional intent,
+current implementation evidence, delivery order, and the minimum maps needed to work safely.
 
 ## Authority
 
-1. Owner-confirmed functional decisions (the newest confirmed workflow rules).
-2. The functional manual in `MANUAL.md`.
-3. The current implementation is **evidence of what exists**, never a functional rule. Implementation detail must not be promoted into functional truth.
+1. The newest owner-confirmed Beta decisions.
+2. `BETA_FUNCTIONAL_MANUAL.md`.
+3. `CURRENT_STATE.md` as evidence of what DMO-MODULAR currently proves.
 
-## Rules
+Implementation evidence never creates a functional rule. If a rule is absent here, it is unknown;
+do not infer it from code, screenshots, prototypes, old plans, reports, or another repository.
 
-- This repository does **not** link to the old DMO/BA repositories.
-- This repository does **not** instruct anyone to consult historical repositories, plans, reports, designs or workstream documents.
-- Information that is **absent** from this repository is **unknown**. Unknown means unknown: it must not be recovered, reconstructed or inferred from old repositories.
-- Genuine open owner questions are recorded as open. They are not resolved by guessing.
+## Beta Scope
+
+Included: Job On, Ferramentas, Controlo, Boquilhas, Admin, documents/PDF/email, and the shared
+identity, access, navigation, audit, and design-system rules needed by those areas.
+
+Excluded from Beta: Armazém, Reparação Interna, Reparação Externa, Tampões, and Design Laboratório.
+Those names must not be added to Beta navigation, workflows, roadmap items, or implementation
+assumptions. A TP/Tampão field in a Job On production configuration is not the excluded Tampões
+module.
+
+## Files
+
+- `BETA_FUNCTIONAL_MANUAL.md` — the only Beta functional manual.
+- `CURRENT_STATE.md` — verified, partial, legacy, and missing implementation evidence.
+- `ROADMAP.md` — ordered delivery plan with exit criteria.
+- `FRONTEND_RULES.md` — non-negotiable shell, navigation, access, and interaction rules.
+- `maps/IDENTITY_RELATIONS.md` — canonical identity and ownership map.
+- `maps/MODULE_FLOW.md` — user and module flow.
+- `maps/DOCUMENT_FLOW.md` — structured record, PDF, storage, and email flow.
+
+## Working Rules
+
+- Keep the Beta manual functional and implementation-agnostic.
+- Use only the allowed Novo source and DMO-MODULAR evidence when updating this pack.
+- Preserve existing canonical identities: `tool_id`, `jobon_id`, `cm_id`, `mf_id`, and `bq_id`.
+- Do not add parallel identities, inferred relations, or fake records to make a screen appear complete.
+- Keep unknowns explicitly open rather than resolving them by guesswork.
