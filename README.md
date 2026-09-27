@@ -22,6 +22,16 @@ Those names must not be added to Beta navigation, workflows, roadmap items, or i
 assumptions. A TP/Tampão field in a Job On production configuration is not the excluded Tampões
 module.
 
+## Identity and Access Canon
+
+The Beta access model is based on:
+
+`Utilizador → Template de acesso → Módulos/permissões`
+
+Do not interpret the application as being based on fixed business roles such as `Operador` or
+`Responsável`. Those names belong to previous models and must not be reintroduced as the current
+architecture.
+
 ## Files
 
 - `BETA_FUNCTIONAL_MANUAL.md` — the only Beta functional manual.
