@@ -1,20 +1,3 @@
-> **ARCHIVED RAW INPUT — NOT AUTHORITY, NOT THIS REPOSITORY'S PLAN.**
->
-> This file is a raw reconstruction of an external DMO-MODULAR implementation state, captured from a
-> Qwen session. It reads like a live plan, but it is **not** the roadmap of this repository. Its
-> migration numbers, steps R-01…R-08, acceptance criteria, and "DO NOT TOUCH" directives are not
-> binding here, and the files it cites are not present in this repository.
->
-> - The current roadmap is `delivery/ROADMAP.md`.
-> - The role language in this file belongs to a previous model; see
->   `governance/LEGACY_CONTAMINATION.md`.
-> - Any implementation fact in this file is unverified evidence at best. Do not promote it into the
->   active context.
->
-> See `archive/README.md`.
-
----
-
 # DMO BETA — IMPLEMENTATION STATE RECONSTRUCTION & ROADMAP
 
 **Authority order applied:**

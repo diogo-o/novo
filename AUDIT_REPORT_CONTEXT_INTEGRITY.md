@@ -1,21 +1,3 @@
-> **ARCHIVED — HISTORICAL AUDIT, NOT AUTHORITY.**
->
-> This is a read-only audit of the context pack as it existed at commit `7bc8ddd`, before the
-> module reorganization. Its findings were resolved or are tracked by the current pack:
->
-> - C-1 access-model contradiction → resolved by `shared/ACCESS_MODEL.md` and
->   `governance/CONTEXT_DECISIONS.md` D-02 (template canon wins; fixed profiles are legacy);
-> - C-2 permission granularity → recorded as UNKNOWN in `shared/ACCESS_MODEL.md` section 3 (D-03);
-> - L-1/L-2 archived raw plan and empty stubs → `archive/README.md` (D-07);
-> - L-3 deleted `MANUAL.md` → `governance/LEGACY_CONTAMINATION.md`;
-> - L-4 roadmap evidence-versus-delivery → `delivery/ROADMAP.md` (D-06);
-> - external-repo coupling → `governance/CONTEXT_DECISIONS.md` D-12.
->
-> File names, line numbers, and recommendations below describe the previous structure. Do not treat
-> them as current.
-
----
-
 # DMO Novo Repository — Context Integrity Audit
 
 Audit scope: `diogo-o/novo`, branch `main`, HEAD `7bc8ddd`.
